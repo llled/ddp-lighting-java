@@ -55,6 +55,11 @@ By participating in this project, you agree to maintain a respectful and inclusi
    ./gradlew check
    ```
 
+4. Publish to local Maven repo to use your changes in other local code.
+   ```bash
+   ./gradlew publishToMavenLocal
+   ```
+
 ## Making Changes
 
 ### Branch Naming
