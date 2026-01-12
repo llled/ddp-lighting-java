@@ -1,10 +1,10 @@
 plugins {
     id 'java-library'
-    id 'maven-publish'
+    id "com.vanniktech.maven.publish" version "0.35.0"
 }
 
 group = 'org.llled'
-version = '1.0.0'
+version = '0.1.0'
 
 repositories {
     mavenCentral()
@@ -29,18 +29,36 @@ test {
     useJUnitPlatform()
 }
 
-publishing {
-    publications {
-        maven(MavenPublication) {
-            from components.java
+mavenPublishing {
+    publishToMavenCentral()
 
-            groupId = 'org.llled'
-            artifactId = 'ddp-lighting-java'
-            version = '1.0.0'
+    signAllPublications()
+
+    coordinates("org.llled", "ddp-lighting-java", "0.1.0-SNAPSHOT")
+
+    pom {
+        name = "DDP Lighting Java"
+        description = "An implementation of the DDP lighting protocol (http://www.3waylabs.com/ddp/) in pure Java."
+        inceptionYear = "2025"
+        url = "https://github.com/llled/ddp-lighting-java"
+        licenses {
+            license {
+                name = "GNU LESSER GENERAL PUBLIC LICENSE, Version 3.0"
+                url = "https://www.gnu.org/licenses/lgpl-3.0.txt"
+                distribution = "https://www.gnu.org/licenses/lgpl-3.0.txt"
+            }
         }
-    }
-
-    repositories {
-        mavenLocal()
+        developers {
+            developer {
+                id = "alexmkt"
+                name = "Alex Thurlow"
+                url = "https://github.com/alexmkt/"
+            }
+        }
+        scm {
+            url = "https://github.com/llled/ddp-lighting-java"
+            connection = "scm:git:git://github.com/llled/ddp-lighting-java.git"
+            developerConnection = "scm:git:ssh://git@github.com/llled/ddp-lighting-java.git"
+        }
     }
 }

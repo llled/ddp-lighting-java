@@ -27,7 +27,7 @@ Add to your `pom.xml`:
 <dependency>
     <groupId>org.llled</groupId>
     <artifactId>ddp-lighting-java</artifactId>
-    <version>1.0.0</version>
+    <version>0.1.0</version>
 </dependency>
 ```
 
@@ -37,7 +37,7 @@ Add to your `build.gradle`:
 
 ```gradle
 dependencies {
-    implementation 'org.llled:ddp-lighting-java:1.0.0'
+    implementation 'org.llled:ddp-lighting-java:0.1.0'
 }
 ```
 
