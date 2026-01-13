@@ -304,10 +304,6 @@ Test coverage includes:
 
 Contributions are welcome! Please feel free to submit a Pull Request.
 
-## Related Projects
-
-- **LLLed** - LED lighting control system that uses this library
-
 ## Support
 
 For bugs and feature requests, please open an issue on GitHub.
