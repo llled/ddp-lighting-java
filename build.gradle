@@ -1,5 +1,6 @@
 plugins {
     id 'java-library'
+    id 'signing'
     id "com.vanniktech.maven.publish" version "0.35.0"
 }
 
@@ -29,12 +30,16 @@ test {
     useJUnitPlatform()
 }
 
+signing {
+    useGpgCmd()
+}
+
 mavenPublishing {
     publishToMavenCentral()
 
     signAllPublications()
 
-    coordinates("org.llled", "ddp-lighting-java", "0.1.0-SNAPSHOT")
+    coordinates("org.llled", "ddp-lighting-java", "0.1.0")
 
     pom {
         name = "DDP Lighting Java"
