@@ -1,6 +1,6 @@
 # ddp-lighting-java
 
-A lightweight, zero-copy Java library for the DDP (Distributed Display Protocol) used to control addressable LED pixels over UDP.
+A lightweight Java library for DDP (Distributed Display Protocol) used to control addressable LED pixels over UDP.
 
 ## Features
 
@@ -298,7 +298,7 @@ Test coverage includes:
 
 ## License
 
-[Add your license here]
+[LGPL 3.0](https://www.gnu.org/licenses/lgpl-3.0.txt)
 
 ## Contributing
 
