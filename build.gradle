@@ -5,7 +5,6 @@ plugins {
 }
 
 group = 'org.llled'
-version = '0.2.0'
 
 repositories {
     mavenCentral()
@@ -36,11 +35,6 @@ signing {
 
 mavenPublishing {
     publishToMavenCentral()
-
-    // Only sign when explicitly publishing to Maven Central (not mavenLocal)
-    if (project.gradle.startParameter.taskNames.any { it.contains("Central") }) {
-        signAllPublications()
-    }
 
     coordinates("org.llled", "ddp-lighting-java", "0.2.0")
 
