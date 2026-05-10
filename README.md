@@ -1,13 +1,15 @@
 # ddp-lighting-java
 
-A lightweight Java library for DDP (Distributed Display Protocol) used to control addressable LED pixels over UDP. 
+A lightweight Java library for DDP (Distributed Display Protocol) used to control and receive addressable LED pixel data over UDP.
 
 ## Features
 
+- **Send and receive** - Both client (transmitter) and receiver implementations
 - **Zero-copy architecture** - Reusable buffers minimize allocation overhead
-- **Thread-safe** - Stateless encoders and per-instance clients
-- **Simple API** - Send RGB/RGBW frames with minimal boilerplate
+- **Thread-safe** - Stateless encoders/decoders and per-instance clients
+- **Simple API** - Send and receive RGB/RGBW frames with minimal boilerplate
 - **Automatic packetization** - Handles frame fragmentation for large pixel counts
+- **Automatic reassembly** - Receiver reassembles multi-packet frames using the offset field and delivers on PUSH
 - **Well-tested** - Comprehensive unit test coverage
 - **No dependencies** - Uses only Java standard library
 
@@ -27,7 +29,7 @@ Add to your `pom.xml`:
 <dependency>
     <groupId>org.llled</groupId>
     <artifactId>ddp-lighting-java</artifactId>
-    <version>0.1.0</version>
+    <version>0.2.0</version>
 </dependency>
 ```
 
@@ -37,7 +39,7 @@ Add to your `build.gradle`:
 
 ```gradle
 dependencies {
-    implementation 'org.llled:ddp-lighting-java:0.1.0'
+    implementation 'org.llled:ddp-lighting-java:0.2.0'
 }
 ```
 
@@ -104,6 +106,54 @@ try {
 } finally {
     client.close();
 }
+```
+
+### Receiving DDP Frames
+
+```java
+import org.llled.ddp.DdpReceiver;
+import org.llled.ddp.DdpProtocol;
+import org.llled.ddp.DdpException;
+
+public class ReceiverExample {
+    public static void main(String[] args) throws DdpException, InterruptedException {
+        DdpReceiver receiver = new DdpReceiver(DdpProtocol.DEFAULT_PORT, (frameData, dataLength, dataType) -> {
+            // Called when a complete frame arrives (after the PUSH flag).
+            // frameData is reused across frames - copy out anything you need to keep.
+            if (dataType == DdpProtocol.TYPE_RGB_8BIT) {
+                int pixelCount = dataLength / DdpProtocol.BYTES_PER_PIXEL_RGB;
+                int r = frameData[0] & 0xFF;
+                int g = frameData[1] & 0xFF;
+                int b = frameData[2] & 0xFF;
+                System.out.printf("Frame: %d pixels, first=(%d,%d,%d)%n", pixelCount, r, g, b);
+            }
+        });
+
+        receiver.start();
+
+        // Listen for 60 seconds, then stop
+        Thread.sleep(60_000);
+        receiver.close();
+    }
+}
+```
+
+### Receiver with Error Handling
+
+```java
+DdpReceiver receiver = new DdpReceiver(4048, new DdpFrameListener() {
+    @Override
+    public void onFrameReceived(byte[] frameData, int dataLength, byte dataType) {
+        renderToStrip(frameData, dataLength, dataType);
+    }
+
+    @Override
+    public void onError(DdpException e) {
+        System.err.println("Receive error: " + e.getMessage());
+    }
+});
+
+receiver.start();
 ```
 
 ## API Documentation
@@ -182,6 +232,70 @@ DdpPacketEncoder.encodeRgbPixel(buffer, position, rgbColor);
 
 // Validate packet buffer
 DdpPacketEncoder.validatePacketBuffer(buffer, payloadLength);
+```
+
+### DdpReceiver
+
+UDP listener that binds to a port, reassembles multi-packet frames using the offset field, and delivers complete frames when the PUSH flag is observed. Runs on a daemon thread.
+
+#### Constructors
+
+```java
+// Listen on the given port with the default 512 KB frame buffer
+DdpReceiver receiver = new DdpReceiver(DdpProtocol.DEFAULT_PORT, listener);
+
+// Listen with a custom maximum frame buffer size
+DdpReceiver receiver = new DdpReceiver(4048, listener, 1024 * 1024);
+```
+
+#### Methods
+
+**`start()`**
+
+Binds the UDP socket and starts the receive thread. Throws `DdpException` if the socket cannot be bound.
+
+**`close()`**
+
+Stops the receive thread and closes the socket.
+
+**`isRunning()`**
+
+Returns true if the receiver is actively listening.
+
+**`getPort()`**
+
+Returns the UDP port the receiver is bound to.
+
+#### Notes
+
+- The `frameData` buffer passed to the listener is reused for every frame. If you need to keep the contents beyond the callback, copy them out.
+- The callback is invoked on the receiver thread — keep work fast to avoid blocking the next frame.
+- Frames larger than the configured frame buffer trigger `onError` and are dropped.
+
+### DdpFrameListener
+
+Callback interface for the receiver.
+
+```java
+public interface DdpFrameListener {
+    void onFrameReceived(byte[] frameData, int dataLength, byte dataType);
+    default void onError(DdpException e) { /* optional */ }
+}
+```
+
+### DdpPacketDecoder
+
+Static utility class for low-level packet decoding — the symmetric counterpart to `DdpPacketEncoder`. All methods read directly from the caller's buffer with no allocation.
+
+```java
+boolean push        = DdpPacketDecoder.isPush(buffer);
+byte    dataType    = DdpPacketDecoder.getDataType(buffer);
+byte    destination = DdpPacketDecoder.getDestination(buffer);
+int     offset      = DdpPacketDecoder.getOffset(buffer);
+int     payloadLen  = DdpPacketDecoder.getPayloadLength(buffer);
+
+// Validate a received packet before reading its fields
+DdpPacketDecoder.validatePacket(buffer, receivedLength);
 ```
 
 ### DdpException
@@ -294,6 +408,7 @@ Test coverage includes:
 - Buffer validation
 - Socket creation and communication
 - Frame fragmentation
+- Multi-packet frame reassembly on the receive path
 - Error handling
 
 ## License
