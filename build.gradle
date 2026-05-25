@@ -35,6 +35,7 @@ signing {
 
 mavenPublishing {
     publishToMavenCentral()
+    signAllPublications()
 
     coordinates("org.llled", "ddp-lighting-java", "0.2.0")
 
@@ -63,4 +64,8 @@ mavenPublishing {
             developerConnection = "scm:git:ssh://git@github.com/llled/ddp-lighting-java.git"
         }
     }
+}
+
+tasks.withType(Sign).configureEach {
+    onlyIf { gradle.taskGraph.allTasks.any { it.name.contains("MavenCentral") } }
 }
