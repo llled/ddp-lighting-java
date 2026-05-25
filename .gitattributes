@@ -1,0 +1,8 @@
+# Force shell scripts to LF so they remain executable on Linux/WSL/macOS,
+# even when the repo is checked out on Windows with core.autocrlf=true.
+gradlew    text eol=lf
+*.sh       text eol=lf
+
+# Keep Windows batch files as CRLF.
+*.bat      text eol=crlf
+*.cmd      text eol=crlf

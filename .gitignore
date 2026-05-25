@@ -109,3 +109,5 @@ test-output/
 # JUnit reports
 junit-*.xml
 TEST-*.xml
+
+.claude/
