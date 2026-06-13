@@ -3,6 +3,7 @@ package org.llled.ddp;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.net.InetAddress;
 import java.net.SocketException;
 
 /**
@@ -122,7 +123,7 @@ public class DdpReceiver {
         while (running) {
             try {
                 socket.receive(packet);
-                processPacket(receiveBuffer, packet.getLength());
+                processPacket(receiveBuffer, packet.getLength(), packet.getAddress());
             } catch (IOException e) {
                 if (running) {
                     listener.onError(new DdpException("Error receiving DDP packet", e));
@@ -133,6 +134,10 @@ public class DdpReceiver {
     }
 
     void processPacket(byte[] buffer, int receivedLength) {
+        processPacket(buffer, receivedLength, null);
+    }
+
+    void processPacket(byte[] buffer, int receivedLength, InetAddress source) {
         try {
             DdpPacketDecoder.validatePacket(buffer, receivedLength);
         } catch (IllegalArgumentException e) {
@@ -169,7 +174,7 @@ public class DdpReceiver {
 
         // If PUSH flag is set, deliver the complete frame
         if (push) {
-            listener.onFrameReceived(frameBuffer, frameDataLength, currentDataType);
+            listener.onFrameReceived(frameBuffer, frameDataLength, currentDataType, source);
             frameDataLength = 0;
         }
     }

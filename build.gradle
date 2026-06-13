@@ -37,7 +37,7 @@ mavenPublishing {
     publishToMavenCentral()
     signAllPublications()
 
-    coordinates("org.llled", "ddp-lighting-java", "0.2.0")
+    coordinates("org.llled", "ddp-lighting-java", "0.3.0")
 
     pom {
         name = "DDP Lighting Java"
